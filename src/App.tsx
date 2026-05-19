@@ -2,6 +2,7 @@ import 'bootstrap/dist/css/bootstrap.min.css';
 import { useEffect, useState } from 'react';
 import { graphqlRequest } from './api/graphql';
 import MessageFeed from './components/MessageFeed';
+import TelemetryCards from './components/TelemetryCards';
 import type { MessagesResponse, TelemetryResponse } from './types/ant61';
 import { GET_LATEST_TELEMETRY_FOR_BEACON } from './api/ant61Queries';
 
@@ -42,7 +43,7 @@ function App() {
       const telemetryResult = await graphqlRequest<TelemetryResponse>(
             GET_LATEST_TELEMETRY_FOR_BEACON,
                 {
-                  beaconUid: BEACON_UID,
+                  beaconUid: BEACON_UID,  // GraphQL variable
                 }
           );
 
@@ -58,6 +59,9 @@ function App() {
   useEffect(() => {
     loadData();
   }, []);
+
+
+  const latestTelemetry = telemetryData?.beacon_telemetry_message[0];
 
   return (
     <main className="container py-4">
@@ -78,14 +82,7 @@ function App() {
 
       {data && <MessageFeed messages={data.message} />}
 
-      {telemetryData && (
-        <div className="card mt-3">
-          <div className="card-header">Latest telemetry</div>
-          <div className="card-body">
-            <pre>{JSON.stringify(telemetryData, null, 2)}</pre>
-          </div>
-        </div>
-      )}
+    {latestTelemetry && <TelemetryCards telemetry={latestTelemetry} />}
     </main>
   );
 }
