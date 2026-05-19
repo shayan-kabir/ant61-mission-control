@@ -2,14 +2,17 @@ import 'bootstrap/dist/css/bootstrap.min.css';
 import { useEffect, useState } from 'react';
 import { graphqlRequest } from './api/graphql';
 import MessageFeed from './components/MessageFeed';
-import type { MessagesResponse } from './types/ant61';
+import type { MessagesResponse, TelemetryResponse } from './types/ant61';
+import { GET_LATEST_TELEMETRY_FOR_BEACON } from './api/ant61Queries';
 
+const BEACON_UID = '985141ba-f0f6-44bd-81ff-31a91fdf1925';
 
 
 function App() {
   const [data, setData] = useState<MessagesResponse | null>(null);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+  const [telemetryData, setTelemetryData] = useState<TelemetryResponse | null>(null);
 
   async function loadData() {
     try {
@@ -19,6 +22,7 @@ function App() {
       const result = await graphqlRequest<MessagesResponse>(`
           query {
             message(
+            limit: 3
               order_by: { created_at: desc }
 
             ) {
@@ -33,6 +37,17 @@ function App() {
       `);
 
       setData(result);
+
+
+      const telemetryResult = await graphqlRequest<TelemetryResponse>(
+            GET_LATEST_TELEMETRY_FOR_BEACON,
+                {
+                  beaconUid: BEACON_UID,
+                }
+          );
+
+      setTelemetryData(telemetryResult);
+
     } catch (err) {
       setError(err instanceof Error ? err.message : String(err));
     } finally {
@@ -62,6 +77,15 @@ function App() {
       )}
 
       {data && <MessageFeed messages={data.message} />}
+
+      {telemetryData && (
+        <div className="card mt-3">
+          <div className="card-header">Latest telemetry</div>
+          <div className="card-body">
+            <pre>{JSON.stringify(telemetryData, null, 2)}</pre>
+          </div>
+        </div>
+      )}
     </main>
   );
 }
