@@ -1,11 +1,13 @@
 import 'bootstrap/dist/css/bootstrap.min.css';
 import { useEffect, useState } from 'react';
 import { graphqlRequest } from './api/graphql';
+import MessageFeed from './components/MessageFeed';
+import type { MessagesResponse } from './types/ant61';
 
 
 
 function App() {
-  const [data, setData] = useState<Record<string, unknown> | null>(null);
+  const [data, setData] = useState<MessagesResponse | null>(null);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
 
@@ -14,21 +16,20 @@ function App() {
       setLoading(true);
       setError('');
 
-      const result = await graphqlRequest<Record<string, unknown>>(`
-query {
-  message(
-    limit: 5
-    order_by: { created_at: desc }
-    where: { direction: {_eq: downstream} }
-  ) {
-    uid
-    created_at
-    direction
-    payload_length
-    payload_crc
-    payload_string
-  }
-}
+      const result = await graphqlRequest<MessagesResponse>(`
+          query {
+            message(
+              order_by: { created_at: desc }
+
+            ) {
+              uid
+              created_at
+              direction
+              payload_length
+             
+              payload_string
+            }
+          }
       `);
 
       setData(result);
@@ -60,14 +61,7 @@ query {
         </div>
       )}
 
-      {data && (
-        <div className="card">
-          <div className="card-header">GraphQL response</div>
-          <div className="card-body">
-            <pre>{JSON.stringify(data, null, 2)}</pre>
-          </div>
-        </div>
-      )}
+      {data && <MessageFeed messages={data.message} />}
     </main>
   );
 }
