@@ -5,6 +5,8 @@ import MessageFeed from './components/MessageFeed';
 import TelemetryCards from './components/TelemetryCards';
 import type { MessagesResponse, TelemetryResponse } from './types/ant61';
 import { GET_LATEST_TELEMETRY_FOR_BEACON } from './api/ant61Queries';
+import GpsPosition from './components/GpsPosition';
+import ImuPanel from './components/ImuPanel';
 
 const BEACON_UID = '985141ba-f0f6-44bd-81ff-31a91fdf1925';
 
@@ -83,6 +85,17 @@ function App() {
       {data && <MessageFeed messages={data.message} />}
 
     {latestTelemetry && <TelemetryCards telemetry={latestTelemetry} />}
+
+    {latestTelemetry && (
+    <div className="row">
+      <div className="col-md-6">
+        <GpsPosition telemetry={latestTelemetry} />
+      </div>
+      <div className="col-md-6">
+        <ImuPanel telemetry={latestTelemetry} />
+      </div>
+    </div>
+    )}
     </main>
   );
 }

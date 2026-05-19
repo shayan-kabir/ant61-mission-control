@@ -28,5 +28,3 @@ export const GET_LATEST_TELEMETRY_FOR_BEACON = `
     }
   }
 `;
-
-const BEACON_UID = '985141ba-f0f6-44bd-81ff-31a91fdf1925';
