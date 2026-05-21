@@ -5,10 +5,12 @@ import MessageFeed from './components/MessageFeed';
 import TelemetryCards from './components/TelemetryCards';
 import type { MessagesResponse, TelemetryResponse, BeaconsResponse, Beacon } from './types/ant61';
 import { GET_LATEST_TELEMETRY_FOR_BEACON,
-  GET_BEACONS
+  GET_BEACONS, 
+  SEND_UPSTREAM_MESSAGE,
  } from './api/ant61Queries';
 import GpsPosition from './components/GpsPosition';
 import ImuPanel from './components/ImuPanel';
+import SendMessagePanel from './components/SendMessagePanel';
 
 const BEACON_UID = '985141ba-f0f6-44bd-81ff-31a91fdf1925';
 
@@ -20,6 +22,9 @@ function App() {
   const [telemetryData, setTelemetryData] = useState<TelemetryResponse | null>(null);
   //const [beacons, setBeacons] = useState<Beacon[] | null>(null);
   const [selectedBeacon, setSelectedBeacon] = useState<Beacon | null>(null);
+  const [messageText, setMessageText] = useState('Hello from ANT61 Mission Control');
+
+
 
   async function loadData() {
     try {
@@ -73,6 +78,30 @@ function App() {
     }
   }
 
+  async function sendUpstreamMessage() {
+    console.log(Math.floor(Date.now() / 1000));
+    if (!selectedBeacon) {
+      setError('No beacon selected');
+      return;
+    }
+
+    try {
+      setLoading(true);
+      setError('');
+
+      await graphqlRequest(SEND_UPSTREAM_MESSAGE, {
+        beaconUid: selectedBeacon.uid,
+        payloadString: messageText,
+        customId: Math.floor(Date.now() / 1000),
+      });
+
+      setMessageText('');
+    } catch (err) {
+      setError(err instanceof Error ? err.message : String(err));
+    } finally {
+      setLoading(false);
+    }
+  }
 
 
   useEffect(() => {
@@ -135,6 +164,8 @@ useEffect(() => {
   };
 }, [selectedBeacon]);
 
+
+
   useEffect(() => {
     loadData();
   }, []);
@@ -174,6 +205,15 @@ useEffect(() => {
     </div>
     )}
 
+{selectedBeacon && (
+  <SendMessagePanel
+    messageText={messageText}
+    setMessageText={setMessageText}
+    onSend={sendUpstreamMessage}
+    loading={loading}
+    beaconAlias={selectedBeacon.alias}
+  />
+)}
 
     {selectedBeacon && (
    <div className="alert alert-secondary">

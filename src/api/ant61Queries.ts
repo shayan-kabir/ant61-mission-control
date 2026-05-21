@@ -30,10 +30,6 @@ export const GET_LATEST_TELEMETRY_FOR_BEACON = `
 `;
 
 
-
-
-
-
 export const GET_BEACONS = `
   query GetBeacons {
     beacon {
@@ -41,6 +37,27 @@ export const GET_BEACONS = `
       alias
       status
       last_seen_at
+    }
+  }
+`;
+
+
+
+export const SEND_UPSTREAM_MESSAGE = `
+  mutation SendMessageString($beaconUid: uuid!, $payloadString: String!, $customId: bigint!) {
+    insert_message(
+      objects: [
+        {
+          beacon_uid: $beaconUid
+          direction: upstream
+          payload_string: $payloadString
+          custom_id: $customId
+        }
+      ]
+    ) {
+      returning {
+        uid
+      }
     }
   }
 `;
