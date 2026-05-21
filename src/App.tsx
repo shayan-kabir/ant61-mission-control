@@ -104,6 +104,37 @@ function App() {
     };
   }, [selectedBeacon]);
 
+
+useEffect(() => {
+  if (!selectedBeacon) return;
+
+  const eventSource = new EventSource(
+    `http://localhost:4000/api/message-stream?beaconUid=${selectedBeacon.uid}`
+  );
+
+  eventSource.addEventListener('connected', (event) => {
+    console.log('Message stream connected:', event.data);
+  });
+
+  eventSource.addEventListener('messages', (event) => {
+    console.log('Message event received in React:', event.data);
+
+    const payload = JSON.parse(event.data);
+
+    if (payload.data) {
+      setData(payload.data);
+    }
+  });
+
+  eventSource.addEventListener('stream-error', (event) => {
+    console.error('Message stream error:', event);
+  });
+
+  return () => {
+    eventSource.close();
+  };
+}, [selectedBeacon]);
+
   useEffect(() => {
     loadData();
   }, []);
