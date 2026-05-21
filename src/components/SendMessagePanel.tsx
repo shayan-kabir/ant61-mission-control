@@ -38,7 +38,7 @@ function SendMessagePanel({
         </div>
 
         <small className="text-muted">
-          Command back to {beaconAlias}.
+          Command back to {beaconAlias}
         </small>
       </div>
     </div>

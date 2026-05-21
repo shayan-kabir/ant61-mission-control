@@ -173,56 +173,66 @@ useEffect(() => {
 
   const latestTelemetry = telemetryData?.beacon_telemetry_message[0];
 
-  return (
-    <main className="container py-4">
-      <h1>ANT61 Mission Control</h1>
-      <p className="text-muted">Testing live GraphQL telemetry connection</p>
+ return (
+  <main className="dashboard-shell">
+    <section className="dashboard-header d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3">
+      <div>
+        <h1 className="dashboard-title">ANT61 Mission Control</h1>
+        <p className="dashboard-subtitle">Live GraphQL telemetry dashboard</p>
 
-      <button className="btn btn-primary mb-3" onClick={loadData}>
+        {selectedBeacon && (
+          <div className="status-pill mt-3">
+              {selectedBeacon.alias} — {selectedBeacon.status}
+          </div>
+        )}
+      </div>
+
+      <button className="btn btn-ant" onClick={loadData}>
         Refresh
       </button>
+    </section>
 
-      {loading && <div className="alert alert-info">Loading...</div>}
+    {loading && <div className="alert alert-info">Loading...</div>}
 
-      {error && (
-        <div className="alert alert-danger">
-          <strong>Error:</strong> {error}
-        </div>
-      )}
-
-      {data && <MessageFeed messages={data.message} />}
+    {error && (
+      <div className="alert alert-danger">
+        <strong>Error:</strong> {error}
+      </div>
+    )}
 
     {latestTelemetry && <TelemetryCards telemetry={latestTelemetry} />}
 
     {latestTelemetry && (
-    <div className="row">
-      <div className="col-md-6">
-        <GpsPosition telemetry={latestTelemetry} />
+      <div className="row g-4 mt-1">
+        <div className="col-lg-6">
+          <GpsPosition telemetry={latestTelemetry} />
+        </div>
+
+        <div className="col-lg-6">
+          <ImuPanel telemetry={latestTelemetry} />
+        </div>
       </div>
-      <div className="col-md-6">
-        <ImuPanel telemetry={latestTelemetry} />
-      </div>
-    </div>
     )}
 
-{selectedBeacon && (
-  <SendMessagePanel
-    messageText={messageText}
-    setMessageText={setMessageText}
-    onSend={sendUpstreamMessage}
-    loading={loading}
-    beaconAlias={selectedBeacon.alias}
-  />
-)}
+    <div className="row g-4 mt-1">
+      <div className="col-lg-7">
+        {data && <MessageFeed messages={data.message} />}
+      </div>
 
-    {selectedBeacon && (
-   <div className="alert alert-secondary">
-    Selected beacon: <strong>{selectedBeacon.alias}</strong> — {selectedBeacon.status}
-  </div>
-
-)}
-    </main>
-  );
+      <div className="col-lg-5">
+        {selectedBeacon && (
+          <SendMessagePanel
+            messageText={messageText}
+            setMessageText={setMessageText}
+            onSend={sendUpstreamMessage}
+            loading={loading}
+            beaconAlias={selectedBeacon.alias}
+          />
+        )}
+      </div>
+    </div>
+  </main>
+);
 }
 
 export default App;
