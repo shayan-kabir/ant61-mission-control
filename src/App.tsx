@@ -3,8 +3,10 @@ import { useEffect, useState } from 'react';
 import { graphqlRequest } from './api/graphql';
 import MessageFeed from './components/MessageFeed';
 import TelemetryCards from './components/TelemetryCards';
-import type { MessagesResponse, TelemetryResponse } from './types/ant61';
-import { GET_LATEST_TELEMETRY_FOR_BEACON } from './api/ant61Queries';
+import type { MessagesResponse, TelemetryResponse, BeaconsResponse, Beacon } from './types/ant61';
+import { GET_LATEST_TELEMETRY_FOR_BEACON,
+  GET_BEACONS
+ } from './api/ant61Queries';
 import GpsPosition from './components/GpsPosition';
 import ImuPanel from './components/ImuPanel';
 
@@ -16,6 +18,8 @@ function App() {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const [telemetryData, setTelemetryData] = useState<TelemetryResponse | null>(null);
+  //const [beacons, setBeacons] = useState<Beacon[] | null>(null);
+  const [selectedBeacon, setSelectedBeacon] = useState<Beacon | null>(null);
 
   async function loadData() {
     try {
@@ -42,14 +46,25 @@ function App() {
       setData(result);
 
 
+    const beaconResult = await graphqlRequest<BeaconsResponse>(GET_BEACONS);
+    // setBeacons(beaconResult.beacon);
+    const beaconToUse = selectedBeacon ?? beaconResult.beacon[0];
+    if (!beaconToUse) {
+      throw new Error('No beacons available');
+
+    }
+
+    setSelectedBeacon(beaconToUse);
+
       const telemetryResult = await graphqlRequest<TelemetryResponse>(
             GET_LATEST_TELEMETRY_FOR_BEACON,
                 {
-                  beaconUid: BEACON_UID,  // GraphQL variable
+                  beaconUid: beaconToUse.uid,  // GraphQL variable
                 }
           );
 
       setTelemetryData(telemetryResult);
+
 
     } catch (err) {
       setError(err instanceof Error ? err.message : String(err));
@@ -96,6 +111,14 @@ function App() {
       </div>
     </div>
     )}
+
+
+    {selectedBeacon && (
+   <div className="alert alert-secondary">
+    Selected beacon: <strong>{selectedBeacon.alias}</strong> — {selectedBeacon.status}
+  </div>
+
+)}
     </main>
   );
 }

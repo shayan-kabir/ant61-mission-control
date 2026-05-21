@@ -28,3 +28,19 @@ export const GET_LATEST_TELEMETRY_FOR_BEACON = `
     }
   }
 `;
+
+
+
+
+
+
+export const GET_BEACONS = `
+  query GetBeacons {
+    beacon {
+      uid
+      alias
+      status
+      last_seen_at
+    }
+  }
+`;

@@ -38,3 +38,18 @@ export interface TelemetryResponse {
   beacon_telemetry_message: BeaconTelemetry[];
 
 }
+
+
+
+
+
+export interface Beacon {
+  uid: string;
+  alias: string;
+  status: string;
+  last_seen_at: string;
+}
+
+export interface BeaconsResponse {
+  beacon: Beacon[];
+}
