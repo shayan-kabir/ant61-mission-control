@@ -48,7 +48,7 @@ function App() {
 
     const beaconResult = await graphqlRequest<BeaconsResponse>(GET_BEACONS);
     // setBeacons(beaconResult.beacon);
-    const beaconToUse = selectedBeacon ?? beaconResult.beacon[0];
+    const beaconToUse = beaconResult.beacon[0];
     if (!beaconToUse) {
       throw new Error('No beacons available');
 
@@ -72,6 +72,37 @@ function App() {
       setLoading(false);
     }
   }
+
+
+
+  useEffect(() => {
+    if (!selectedBeacon) return;
+
+    const eventSource = new EventSource(
+      `http://localhost:4000/api/telemetry-stream?beaconUid=${selectedBeacon.uid}`
+    );
+
+    eventSource.addEventListener('connected', (event) => {
+      console.log('Telemetry stream connected:', event.data);
+    });
+
+    eventSource.addEventListener('telemetry', (event) => {
+      console.log('Telemetry event received in React:', event.data);
+      const payload = JSON.parse(event.data);
+
+      if (payload.data) {
+        setTelemetryData(payload.data);
+      }
+    });
+
+    eventSource.addEventListener('stream-error', (event) => {
+      console.error('Telemetry stream error:', event);
+    });
+
+    return () => {
+      eventSource.close();
+    };
+  }, [selectedBeacon]);
 
   useEffect(() => {
     loadData();
