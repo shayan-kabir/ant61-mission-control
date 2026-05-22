@@ -61,3 +61,22 @@ export const SEND_UPSTREAM_MESSAGE = `
     }
   }
 `;
+
+
+
+export const FETCH_LATEST_MESSAGES_FOR_BEACON = `
+          query {
+            message(
+            limit: 3
+              order_by: { created_at: desc }
+
+            ) {
+              uid
+              created_at
+              direction
+              payload_length
+             
+              payload_string
+            }
+          }
+      `

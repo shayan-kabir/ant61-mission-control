@@ -168,6 +168,7 @@ app.get('/api/message-stream', async (req, res) => {
   try {
     const token = await getJwtToken();
 
+    // Connect to ANT61’s wss:// GraphQL endpoint.
     const client = createClient({
       url: process.env.VITE_ANT61_GRAPHQL_WS_URL!,
       webSocketImpl: WebSocket,

@@ -7,6 +7,7 @@ import type { MessagesResponse, TelemetryResponse, BeaconsResponse, Beacon } fro
 import { GET_LATEST_TELEMETRY_FOR_BEACON,
   GET_BEACONS, 
   SEND_UPSTREAM_MESSAGE,
+  FETCH_LATEST_MESSAGES_FOR_BEACON,
  } from './api/ant61Queries';
 import GpsPosition from './components/GpsPosition';
 import ImuPanel from './components/ImuPanel';
@@ -31,22 +32,7 @@ function App() {
       setLoading(true);
       setError('');
 
-      const result = await graphqlRequest<MessagesResponse>(`
-          query {
-            message(
-            limit: 3
-              order_by: { created_at: desc }
-
-            ) {
-              uid
-              created_at
-              direction
-              payload_length
-             
-              payload_string
-            }
-          }
-      `);
+      const result = await graphqlRequest<MessagesResponse>(FETCH_LATEST_MESSAGES_FOR_BEACON);
 
       setData(result);
 
@@ -104,9 +90,11 @@ function App() {
   }
 
 
+  // SSE Connection for live telemetry updates
   useEffect(() => {
     if (!selectedBeacon) return;
 
+    // Creates persistent one way HTTP connection to the server.
     const eventSource = new EventSource(
       `http://localhost:4000/api/telemetry-stream?beaconUid=${selectedBeacon.uid}`
     );
@@ -133,7 +121,7 @@ function App() {
     };
   }, [selectedBeacon]);
 
-
+// SSE Connection for live message updates
 useEffect(() => {
   if (!selectedBeacon) return;
 
